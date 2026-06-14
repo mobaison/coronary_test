@@ -1,0 +1,63 @@
+# System Files
+.DS_Store
+.DS_Store?
+ehthumbs.db
+Thumbs.db
+*.log
+*.tmp
+
+# Python Bytecode and Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Model weights & large binary files (prevent GitHub 100MB block)
+models/*.pt
+models/*.pth
+models/*.bin
+models/*.onnx
+models/*.weights
+models/*.h5
+
+# Local User Data (ignore uploads/results/reports but keep directory structure)
+data/uploads/*
+!data/uploads/.gitkeep
+data/results/*
+!data/results/.gitkeep
+data/reports/*
+!data/reports/.gitkeep

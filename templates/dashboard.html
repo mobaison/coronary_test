@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1><i class="fas fa-chart-line"></i> Analysis Dashboard</h1>
+        <p>Overview of all coronary angiogram analyses</p>
+    </div>
+    
+    {% if results %}
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #4CAF50;">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ results|length }}</h3>
+                <p>Total Analyses</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #2196F3;">
+                <i class="fas fa-user-injured"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ results|selectattr('stenosis_detected')|list|length }}</h3>
+                <p>Positive Cases</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #FF9800;">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ results|rejectattr('stenosis_detected')|list|length }}</h3>
+                <p>Negative Cases</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="analyses-table">
+        <h2><i class="fas fa-history"></i> Recent Analyses</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Patient</th>
+                    <th>Session ID</th>
+                    <th>Result</th>
+                    <th>Detections</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results|reverse %}
+                <tr>
+                    <td>{{ result.timestamp[:19] }}</td>
+                    <td>{{ result.patient_name }}</td>
+                    <td><code>{{ result.session_id }}</code></td>
+                    <td>
+                        {% if result.stenosis_detected %}
+                        <span class="badge badge-danger">Positive</span>
+                        {% else %}
+                        <span class="badge badge-success">Negative</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if result.stenosis_detected %}
+                        {{ result.detection_count }} stenosis
+                        {% else %}
+                        None
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-primary" 
+                           onclick="viewResult('{{ result.session_id }}')">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        {% if result.stenosis_detected %}
+                        <a href="{{ url_for('download_report', session_id=result.session_id) }}" 
+                           class="btn btn-sm btn-secondary">
+                            <i class="fas fa-download"></i> Report
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="analytics-section">
+        <h2><i class="fas fa-chart-pie"></i> Analytics</h2>
+        <div class="analytics-cards">
+            <div class="analytics-card">
+                <h3>Artery Distribution</h3>
+                <div id="arteryChart" class="chart-placeholder">
+                    <!-- Placeholder for artery distribution chart -->
+                    <p>LAD: 40% | LCx: 30% | RCA: 25% | LMA: 5%</p>
+                </div>
+            </div>
+            <div class="analytics-card">
+                <h3>Detection Trend</h3>
+                <div id="trendChart" class="chart-placeholder">
+                    <!-- Placeholder for trend chart -->
+                    <p>Last 7 days: 12 positive, 8 negative</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-database fa-3x"></i>
+        <h3>No Analyses Yet</h3>
+        <p>Upload your first coronary angiogram to see results here.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <i class="fas fa-cloud-upload-alt"></i> Upload First Image
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function viewResult(sessionId) {
+    // In a real implementation, this would show detailed results
+    alert('Viewing details for session: ' + sessionId);
+    // You could implement a modal or redirect to detailed view
+}
+</script>
+{% endblock %}

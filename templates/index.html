@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card upload-card">
+    <div class="card-header">
+        <h2><i class="fas fa-cloud-upload-alt"></i> Upload Coronary Angiogram</h2>
+        <p>Upload an X-ray angiogram image for stenosis detection and analysis</p>
+    </div>
+    
+    <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i> {{ error }}
+        </div>
+        {% endif %}
+        
+        <form action="{{ url_for('upload_image') }}" method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+            <div class="form-group">
+                <label for="patientName"><i class="fas fa-user"></i> Patient Name</label>
+                <input type="text" id="patientName" name="patient_name" placeholder="Enter patient name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="imageUpload"><i class="fas fa-file-image"></i> Select Image</label>
+                <div class="file-upload-area" id="dropArea">
+                    <i class="fas fa-file-medical fa-3x"></i>
+                    <p>Drag & drop your angiogram image here or click to browse</p>
+                    <input type="file" id="imageUpload" name="file" accept="image/*" required>
+                    <button type="button" class="btn btn-secondary" id="browseButton">
+                        <i class="fas fa-folder-open"></i> Browse Files
+                    </button>
+                    <p class="file-info" id="fileInfo">No file selected</p>
+                </div>
+                <p class="form-help">Supported formats: PNG, JPG, JPEG, BMP, TIFF</p>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-search"></i> Analyze Image
+                </button>
+                <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Processing image...
+                </div>
+            </div>
+        </form>
+        
+        <div class="info-box">
+            <h4><i class="fas fa-info-circle"></i> What this system detects:</h4>
+            <ul>
+                <li><i class="fas fa-check-circle"></i> Coronary artery stenosis locations</li>
+                <li><i class="fas fa-check-circle"></i> Affected artery segments (SYNTAX score segments)</li>
+                <li><i class="fas fa-check-circle"></i> Artery classification (LAD, LCx, RCA, LMA)</li>
+                <li><i class="fas fa-check-circle"></i> Bounding boxes around detected stenosis</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="fas fa-stethoscope"></i>
+        </div>
+        <h3>AI-Powered Detection</h3>
+        <p>Advanced deep learning models for accurate stenosis detection</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="fas fa-chart-bar"></i>
+        </div>
+        <h3>SYNTAX Score Segments</h3>
+        <p>Identifies coronary segments based on SYNTAX score classification</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="fas fa-file-medical-alt"></i>
+        </div>
+        <h3>Detailed Reports</h3>
+        <p>Generates comprehensive PDF reports with findings</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('imageUpload');
+    const browseButton = document.getElementById('browseButton');
+    const fileInfo = document.getElementById('fileInfo');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const uploadForm = document.getElementById('uploadForm');
+    
+    // Browse button click
+    browseButton.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', function(e) {
+        handleFiles(this.files);
+    });
+    
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    dropArea.addEventListener('drop', function(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+        fileInput.files = files;
+    });
+    
+    // Form submission
+    uploadForm.addEventListener('submit', function() {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        loadingSpinner.style.display = 'block';
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function highlight() {
+        this.classList.add('dragover');
+    }
+    
+    function unhighlight() {
+        this.classList.remove('dragover');
+    }
+    
+    function handleFiles(files) {
+        if (files.length > 0) {
+            const file = files[0];
+            fileInfo.textContent = `${file.name} (${formatFileSize(file.size)})`;
+            fileInfo.style.color = '#27ae60';
+            fileInfo.style.fontWeight = '500';
+        }
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+});
+</script>
+{% endblock %}
